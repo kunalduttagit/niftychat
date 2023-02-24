@@ -1,11 +1,14 @@
+import { useToast } from "@chakra-ui/react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 const ChatContext = createContext();
 
 //children is whole app
 const ChatProvider = ({ children }) => {
     const [user, setUser] = useState();
-
+    const navigate = useNavigate();
+    const toast = useToast();
+   
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -13,9 +16,16 @@ const ChatProvider = ({ children }) => {
 
         //if user not logged in, return to '/' route
         if (!userInfo) {
-            Navigate('/');
+            toast({
+                title: "You should Login to access your Chats",
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom",
+            });
+            navigate("/");
         }
-    }, [Navigate])
+    }, [navigate])
     
 
     return (
