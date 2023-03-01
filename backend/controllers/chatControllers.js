@@ -138,7 +138,6 @@ const renameGroupChat = asyncHandler(async (req, res) => {
 
 const addToGroup = asyncHandler(async (req, res) => {
     const { chatId, userId } = req.body;
-    console.log('initialized')
     const added = await Chat.findByIdAndUpdate(
         chatId,
         { $push: { users: userId } },
@@ -146,14 +145,12 @@ const addToGroup = asyncHandler(async (req, res) => {
     )
         .populate("users", "-password")
         .populate("groupAdmin", "-password");
-    console.log('added and pop')
     if (!added) {
         res.status(400);
         throw new Error('Chat not found');
     } else {
         res.json(added);
     }
-    console.log('completee');
 });
 
 const removeFromGroup = asyncHandler(async (req, res) => {

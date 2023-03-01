@@ -25,7 +25,6 @@ const Login = () => {
     const handleClick = () => setShow(!show);
 
     const submitHandler = async () => {
-        console.log(email, password);
         setLoading(true);
         if (!email || !password) {
             toast({

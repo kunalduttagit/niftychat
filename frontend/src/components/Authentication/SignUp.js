@@ -117,7 +117,7 @@ const SignUp = () => {
             const { data } = await axios.post('api/user', { name, email, password, pic }, config);
 
             toast({
-                title: 'Signed up successfully',
+                title: 'Signed up successfully, Login to continue',
                 status: "success",
                 duration: 5000,
                 isClosable: true,
@@ -126,7 +126,7 @@ const SignUp = () => {
 
             localStorage.setItem('userInfo', JSON.stringify(data));
             setLoading(false);
-            navigate("/chats");
+            navigate("/");
         } catch (error) {
             toast({
                 title: 'SignUp failed',

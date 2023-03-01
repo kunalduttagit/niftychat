@@ -41,7 +41,6 @@ const registerUser = asyncHandler(async (req, res) => {
 //Login
 const authUser = asyncHandler(async (req, res) => {
     const { email, password } = await req.body;
-    console.log(req);
 
     const user = await User.findOne({ email }); //if user exits
 
@@ -81,8 +80,7 @@ const allUsers = asyncHandler(async (req, res) => {
     //find() always returns a true cursor (a set of query objects even empty if nothing matches), a cursor is a pointer to those objects
     //findOne() returns the first document to match the query, if no match is found, it returns NULL
     const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });  //all users except current logged in user | ne -> not equal
-
-    res.send(users);
+    res.status(200).send(users);
 });
 
 module.exports = { registerUser, authUser, allUsers };
