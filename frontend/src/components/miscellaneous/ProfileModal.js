@@ -22,36 +22,39 @@ const ProfileModal = ({ user, children }) => {
                 <span onClick={onOpen}>{children}</span>
             ) : (
                 <IconButton
-                    d={{ base: "flex" }}
+                    d={{ base: 'flex' }}
+                    colorScheme='blackAlpha'
+                    backgroundColor='transparent'
                     icon={
-                        <img
-                            width="31px"
-                            src="https://cdn-icons-png.flaticon.com/512/471/471713.png"
-                        ></img>
+                        <Image
+                            width='31px'
+                            src={user.pic}
+                            borderRadius='full'
+                            boxSize='40px'
+                        />
                     }
                     onClick={onOpen}
                 />
             )}
 
-            <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
+            <Modal isOpen={isOpen} onClose={onClose} size='lg' isCentered>
                 <ModalOverlay />
-                <ModalContent h="400px" bg="#252525" color="white">
-                    <ModalHeader
-                        fontSize="40px"
-                        fontFamily="Montserrat"
-                        fontWeight="500"
-                        textAlign="center"
-                    >
+                <ModalContent bg='#252525' color='white'>
+                    <ModalHeader fontSize='40px' fontFamily='Montserrat' fontWeight='500' textAlign='center'>
                         {user.name}
                     </ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody display="flex" flexDir="column" alignItems="center" justifyContent="space-between" >
-              <Image borderRadius="full" boxSize="150px" src={user.pic} alt={user.name}/>
-              <Text fontSize={{ base: "28px", md: "30px" }} fontFamily="Montserrat" >Email: {user.email} </Text>
+                    <ModalBody display='flex' flexDir='column' alignItems='center' justifyContent='space-between'>
+                        <Image borderRadius='full' boxSize='150px' src={user.pic} alt={user.name} />
+                        <br />
+                        <br />
+                        <Text fontSize={{ base: '24px', md: '27px' }} fontFamily='Montserrat'>
+                            Email: {user.email}{' '}
+                        </Text>
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button colorScheme="blue" mr={3} onClick={onClose}>
+                        <Button colorScheme='blue' mr={3} onClick={onClose}>
                             Close
                         </Button>
                     </ModalFooter>

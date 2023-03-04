@@ -44,11 +44,12 @@ const Login = () => {
                 },
             };
 
-            const data = await axios.post(
+            //const data =
+                await axios.post(
                 "api/user/login",
                 { email, password },
                 config
-            )
+            ).then(data => proceed(data))
             toast({
                 title: "Logged in successfully",
                 status: "success",
@@ -57,9 +58,11 @@ const Login = () => {
                 position: "bottom",
             });
 
-            localStorage.setItem("userInfo", JSON.stringify(data));
-            setLoading(false);
-            navigate("/chats");
+            function proceed(data){
+                localStorage.setItem("userInfo", JSON.stringify(data));
+                setLoading(false);
+                navigate("/chats");
+            }
         } catch (error) {
             toast({
                 title: "Invalid email or password",

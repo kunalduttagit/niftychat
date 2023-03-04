@@ -27,7 +27,7 @@ import UserListItem from "../UserAvatar/UserListItem";
 import ChatLoading from "./ChatLoading";
 import ProfileModal from "./ProfileModal";
 
-const SideDrawer = () => {
+const SideDrawer = ({fetchAgain, setFetchAgain}) => {
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -40,6 +40,7 @@ const SideDrawer = () => {
     const logoutHandler = () => {
         localStorage.removeItem("userInfo");
         navigate("/");
+        window.location.reload(true);
     };
 
     const handleSearch = async () => {
@@ -94,6 +95,7 @@ const SideDrawer = () => {
             const data = await axios.post("/api/chat", { userId }, config);
             setSelectedChat(data);
             setLoadingChat(false);
+            setFetchAgain(!fetchAgain)
             onClose();
         } catch (error) {
             toast({
