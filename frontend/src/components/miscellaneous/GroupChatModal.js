@@ -44,8 +44,6 @@ const GroupChatModal = ({ children }) => {
             const { data } = await axios.get(`/api/user?search=${search}`, config);
 
             setSearchResult(data);
-            console.log(data);
-
             setLoading(false);
         } catch (error) {
             toast({
@@ -144,6 +142,8 @@ const GroupChatModal = ({ children }) => {
                                 placeholder='Group Name'
                                 mb={3}
                                 onChange={e => setGroupChatName(e.currentTarget.value)}
+                                border='none'
+                                bg='#161d26'
                             />
                         </FormControl>
                         <FormControl>
@@ -151,6 +151,8 @@ const GroupChatModal = ({ children }) => {
                                 placeholder='Add users eg: John, Sheldon, Robin'
                                 mb={1}
                                 onChange={e => handleSearch(e.currentTarget.value)}
+                                border='none'
+                                bg='#161d26'
                             />
                         </FormControl>
                         <Box w='100%' display='flex'>

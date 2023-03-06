@@ -11,9 +11,9 @@ import {
     ModalOverlay,
     Text,
     useDisclosure,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
-const ProfileModal = ({ user, children }) => {
+const ProfileModal = ({ user, children, size = 10 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     return (
@@ -22,17 +22,11 @@ const ProfileModal = ({ user, children }) => {
                 <span onClick={onOpen}>{children}</span>
             ) : (
                 <IconButton
-                    d={{ base: 'flex' }}
-                    colorScheme='blackAlpha'
-                    backgroundColor='transparent'
-                    icon={
-                        <Image
-                            width='31px'
-                            src={user.pic}
-                            borderRadius='full'
-                            boxSize='40px'
-                        />
-                    }
+                    display={{ base: 'flex' }}
+                    colorScheme='#252330'
+                    background='#252330'
+                    borderRadius='full'
+                    icon={<Image width='31px' src={user.pic} borderRadius='full' boxSize={size} />}
                     onClick={onOpen}
                 />
             )}

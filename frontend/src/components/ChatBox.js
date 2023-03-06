@@ -9,10 +9,10 @@ const ChatBox = ({ fetchAgain, setFetchAgain }) => {
             display={{ base: selectedChat ? 'flex' : 'none', md: 'flex' }}
             alignItems='center'
             flexDir='column'
-            p={3}
+            p={1}
             bg='black'
             w={{ base: '100%', md: '68%' }}
-            borderRadius='xl'
+            borderRadius='0'
             boxShadow='rgba(0, 0, 0, 0.2) 0px 8px 24px'
         >
             <SingleChat fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
