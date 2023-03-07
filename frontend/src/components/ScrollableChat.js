@@ -1,11 +1,21 @@
-import { Avatar, Tooltip } from '@chakra-ui/react';
+import { Box, Tooltip } from '@chakra-ui/react';
+import Lottie from 'react-lottie';
 import ScrollableFeed from 'react-scrollable-feed';
-import { getSenderInfo, isLastMessage, isSameSender, isSameSenderMargin, isSameUser } from '../config/ChatLogics';
+import { isLastMessage, isSameSender, isSameSenderMargin, isSameUser } from '../config/ChatLogics';
 import { ChatState } from '../Context/ChatProvider';
 import ProfileModal from './miscellaneous/ProfileModal';
+import animationData from '../animation/typing.json';
 
-const ScrollableChat = ({ messages }) => {
+const ScrollableChat = ({ messages, isTyping }) => {
     const { user, selectedChat } = ChatState();
+    const defaultOptions = {
+        loop: true,
+        autoplayout: true,
+        animationData: animationData,
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid slice',
+        },
+    };
     return (
         <ScrollableFeed>
             {messages &&
@@ -39,6 +49,21 @@ const ScrollableChat = ({ messages }) => {
                         </span>
                     </div>
                 ))}
+            {isTyping ? (
+                <Box width='100px' overflow='hidden' padding='0' height='40px' marginTop='10px'>
+                    <Lottie
+                        options={defaultOptions}
+                        width='130%'
+                        overflow='hidden'
+                        style={{
+                            marginBottom: '0',
+                            marginLeft: '8px',
+                        }}
+                    />
+                </Box>
+            ) : (
+                <></>
+            )}
         </ScrollableFeed>
     );
 };

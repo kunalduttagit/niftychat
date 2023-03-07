@@ -22,17 +22,20 @@ import {
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getSender } from '../../config/ChatLogics';
 import { ChatState } from '../../Context/ChatProvider';
 import UserListItem from '../UserAvatar/UserListItem';
 import ChatLoading from './ChatLoading';
 import ProfileModal from './ProfileModal';
+import { Effect } from 'react-notification-badge';
+import NotificationBadge from 'react-notification-badge/lib/components/NotificationBadge'
 
 const SideDrawer = ({ fetchAgain, setFetchAgain }) => {
     const [search, setSearch] = useState('');
     const [searchResult, setSearchResult] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingChat, setLoadingChat] = useState(false);
-    const { user, setSelectedChat, chats, setChats } = ChatState();
+    const { user, setSelectedChat, chats, setChats, notification, setNotification } = ChatState();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
@@ -91,11 +94,16 @@ const SideDrawer = ({ fetchAgain, setFetchAgain }) => {
                     Authorization: `Bearer ${user.data.token}`,
                 },
             };
-            const data = await axios.post('/api/chat', { userId }, config);
-            setSelectedChat(data);
-            setLoadingChat(false);
-            setFetchAgain(!fetchAgain);
-            onClose();
+            //const data =
+            await axios.post('/api/chat', { userId }, config).then(data => proceed(data));
+
+            function proceed(data) {
+                setSelectedChat(data.data);
+                setLoadingChat(false);
+                setFetchAgain(!fetchAgain);
+                onClose();
+            }
+            
         } catch (error) {
             toast({
                 title: 'Error fetcing chats',
@@ -135,19 +143,36 @@ const SideDrawer = ({ fetchAgain, setFetchAgain }) => {
                 <div>
                     <Menu>
                         <MenuButton p={1}>
+                            <NotificationBadge count={notification.length} effect={Effect.SCALE} />
                             <img
                                 width='25px'
-                                src='https://cdn-icons-png.flaticon.com/512/9187/9187534.png'
+                                src='https://cdn-icons-png.flaticon.com/512/9187/9187534.png' //bell icon
                                 style={{ marginBottom: '-8px' }}
                             />
                         </MenuButton>
+                        <MenuList pl={2}>
+                            {!notification.length && 'No new message'}
+                            {notification.map(notif => (
+                                <MenuItem
+                                    key={notif._id}
+                                    onClick={() => {
+                                        setSelectedChat(notif.chat);
+                                        setNotification(notification.filter(n => n !== notif));
+                                    }}
+                                >
+                                    {notif.chat.isGroupChat
+                                        ? `New message in ${notif.chat.chatName}`
+                                        : `New message from ${getSender(user, notif.chat.users)}`}
+                                </MenuItem>
+                            ))}
+                        </MenuList>
                     </Menu>
                     <Menu>
                         <MenuButton
                             colorScheme='black'
                             as={Button}
                             rightIcon={
-                                <img width='25px' src='https://cdn-icons-png.flaticon.com/512/9053/9053262.png' />
+                                <img width='25px' src='https://cdn-icons-png.flaticon.com/512/9053/9053262.png' /> //down arrow
                             }
                         >
                             <Avatar

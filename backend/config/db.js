@@ -9,7 +9,7 @@ const connectDB = async () => {
 
         console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.bold);
     } catch (error) {
-        console.log(`Error: ${error.message}`.red.underline);
+        console.log(`Error: (Maybe internet not connected) ${error.message}`.red.underline);
         process.exit();
     }
 }

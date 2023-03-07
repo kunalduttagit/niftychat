@@ -1,7 +1,7 @@
-import { Box, Button, Stack, StackDivider, Text, useToast } from '@chakra-ui/react';
+import { Avatar, Box, Button, Stack, StackDivider, Text, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { getSender } from '../config/ChatLogics';
+import { getSender, getSenderInfo } from '../config/ChatLogics';
 import { ChatState } from '../Context/ChatProvider';
 import ChatLoading from './miscellaneous/ChatLoading';
 import GroupChatModal from './miscellaneous/GroupChatModal';
@@ -70,7 +70,7 @@ const MyChats = ({ fetchAgain, setFetchAgain }) => {
                         bg='#252330'
                         colorScheme='purple'
                         fontSize={{ base: '17', md: 'auto', lg: '17px' }}
-                        rightIcon={<img width='28px' src='https://cdn-icons-png.flaticon.com/512/4210/4210903.png' />}
+                        rightIcon={<img width='28px' src='https://cdn-icons-png.flaticon.com/512/4210/4210903.png' />} //add icon
                     >
                         Group
                     </Button>
@@ -100,11 +100,35 @@ const MyChats = ({ fetchAgain, setFetchAgain }) => {
                                 }
                                 color={selectedChat === chat ? 'white' : 'gray.300'}
                                 px={3}
-                                py={5}
+                                py={3}
                                 borderRadius='0'
                                 key={chat._id}
+                                display='flex'
+                                alignItems='center'
                             >
-                                <Text>{!chat.isGroupChat ? getSender(loggedUser, chat.users) : chat.chatName}</Text>
+                                <Avatar
+                                    src={
+                                        !chat.isGroupChat
+                                            ? getSenderInfo(loggedUser, chat.users).pic
+                                            : 'https://cdn-icons-png.flaticon.com/512/1256/1256650.png'
+                                    }
+                                    mr={4}
+                                    size='md'
+                                />
+
+                                <Text>
+                                    <Box display='flex' flexDir='column'>
+                                        <p display='flex' className='mychats'>
+                                            {!chat.isGroupChat ? getSender(loggedUser, chat.users) : chat.chatName}
+                                        </p>
+                                        <div className='lm'>
+                                            {chat.latestMessage && chat.isGroupChat && (
+                                                <b>{chat.latestMessage.sender.name}: </b>
+                                            )}
+                                            {chat.latestMessage && chat.latestMessage.content}
+                                        </div>
+                                    </Box>
+                                </Text>
                             </Box>
                         ))}
                     </Stack>

@@ -13,3 +13,12 @@
     overflow-y: scroll;
     scrollbar-width: none;
 }
+
+.mychats {
+    font-size:19px;
+    color: white;
+}
+
+.lm{
+    font-size:15px;
+}

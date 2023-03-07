@@ -9,6 +9,7 @@ import {
     InputRightElement,
     Spinner,
     Text,
+    useStatStyles,
     useToast,
 } from '@chakra-ui/react';
 import axios from 'axios';
@@ -19,13 +20,19 @@ import ProfileModal from './miscellaneous/ProfileModal';
 import UpdateGroupChatModal from './miscellaneous/UpdateGroupChatModal';
 import ScrollableChat from './ScrollableChat';
 import './styles.css';
+import io from 'socket.io-client';
+
+const ENDPOINT = 'http://localhost:5050'; //server or backend
+var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [newMessage, setNewMessage] = useState();
-
-    const { user, selectedChat, setSelectedChat } = ChatState();
+    const [socketConnected, setSocketConnected] = useState(false);
+    const [typing, setTyping] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState();
     const toast = useToast();
 
     const fetchMessages = async () => {
@@ -44,6 +51,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
             setMessages(data);
             setLoading(false);
+
+            socket.emit('joinChat', selectedChat._id);
         } catch (error) {
             toast({
                 title: 'Oops! Failed to load messages  ',
@@ -58,11 +67,21 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     };
 
     useEffect(() => {
+        socket = io(ENDPOINT);
+        socket.emit('setup', user.data);
+        socket.on('connected', () => setSocketConnected(true));
+        socket.on('typing', () => setIsTyping(true));
+        socket.on('stop typing', () => setIsTyping(false));
+    }, []);
+
+    useEffect(() => {
         fetchMessages();
+        selectedChatCompare = selectedChat;
     }, [selectedChat]);
 
     const sendMessage = async event => {
         if (event.key === 'Enter' && newMessage) {
+            socket.emit('stop typing', selectedChat._id);
             try {
                 const config = {
                     headers: {
@@ -81,6 +100,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     },
                     config
                 );
+
+                socket.emit('new message', data);
 
                 setMessages([...messages, data]);
             } catch (error) {
@@ -98,6 +119,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     const sendMessageButton = async event => {
         if (newMessage) {
+            socket.emit('stop typing', selectedChat._id);
             try {
                 const config = {
                     headers: {
@@ -117,6 +139,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     config
                 );
 
+                socket.emit('new message', data);
+
                 setMessages([...messages, data]);
             } catch (error) {
                 toast({
@@ -131,8 +155,43 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         }
     };
 
+    useEffect(() => {
+        socket.on('message received', newMessageReceived => {
+            if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+                {
+                    if (!notification.includes(newMessageReceived)) {
+                        setNotification([newMessageReceived, ...notification])
+                        setFetchAgain(!fetchAgain)
+                    }
+                }
+            } else {
+                setMessages([...messages, newMessageReceived]);
+            }
+        });
+    });
+
     const typingHandler = e => {
         setNewMessage(e.currentTarget.value);
+
+        if (!socketConnected) return;
+
+        if (!typing) {
+            setTyping(true);
+            socket.emit('typing', selectedChat._id);
+        }
+
+        let lastTypingTime = new Date().getTime();
+        let timerLength = 3000;
+        setTimeout(() => {
+            var timeNow = new Date().getTime();
+            var timeDiff = timeNow - lastTypingTime;
+
+            if (timeDiff >= timerLength && typing) {
+                socket.emit('stop typing', selectedChat._id);
+                setTyping(false);
+               // console.log('Stop typing: ' + selectedChat._id)
+            }
+        }, timerLength);
     };
 
     return (
@@ -161,27 +220,27 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                 </Box>
                             </>
                         ) : (
-                            <>
-                                {selectedChat.chatName}
-                                <UpdateGroupChatModal
-                                    fetchAgain={fetchAgain}
-                                    setFetchAgain={setFetchAgain}
-                                    fetchMessages={fetchMessages}
-                                />
-                            </>
+                            <>{selectedChat.chatName}</>
                         )}
-                        <IconButton
-                            display={{ base: 'flex', md: 'none' }}
-                            background='black'
-                            colorScheme='blackAlpha'
-                            icon={
-                                <img
-                                    src='https://cdn-icons-png.flaticon.com/512/5708/5708793.png'
-                                    width='32px'
-                                    onClick={() => setSelectedChat('')}
-                                />
-                            }
-                        />
+                        <Box display='flex'>
+                            {selectedChat.isGroupChat && <UpdateGroupChatModal
+                                fetchAgain={fetchAgain}
+                                setFetchAgain={setFetchAgain}
+                                fetchMessages={fetchMessages}
+                            />}
+                            <IconButton
+                                display={{ base: 'flex', md: 'none' }}
+                                background='black'
+                                colorScheme='blackAlpha'
+                                icon={
+                                    <img
+                                        src='https://cdn-icons-png.flaticon.com/512/5708/5708793.png'
+                                        width='32px'
+                                        onClick={() => setSelectedChat('')}
+                                    />
+                                }
+                            />
+                        </Box>
                     </Text>
                     <Box
                         display='flex'
@@ -206,33 +265,33 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                             />
                         ) : (
                             <div className='messages'>
-                                <ScrollableChat messages={messages} />
+                                <ScrollableChat messages={messages} isTyping={isTyping} />
                             </div>
                         )}
-                        <FormControl onKeyDown={sendMessage} isRequired mt={3} display='flex'>
-                            <Input
-                                varient='filled'
-                                placeholder='Type a messsage...'
-                                bg='#19181F'
-                                border='none'
-                                borderRadius={8}
-                                onChange={typingHandler}
-                                value={newMessage}
-                                color='white'
-                                id='send'
-                            />
+                        <FormControl onKeyDown={sendMessage} isRequired mt={3} display="flex">
+                                <Input
+                                    varient='filled'
+                                    placeholder='Type a messsage...'
+                                    bg='#19181F'
+                                    border='none'
+                                    borderRadius={8}
+                                    onChange={typingHandler}
+                                    value={newMessage}
+                                    color='white'
+                                    id='send'
+                                />
 
-                            <Button
-                                px={3}
-                                py={1}
-                                ml={2}
-                                w='5.6%'
-                                h='86%'
-                                alignSelf='center'
-                                onClick={sendMessageButton}
-                            >
-                                <img src='https://cdn-icons-png.flaticon.com/512/8885/8885650.png' width='28px' />
-                            </Button>
+                                <Button
+                                    px={3}
+                                    py={1}
+                                    ml={2}
+                                    w='5.6%'
+                                    h='86%'
+                                    alignSelf='center'
+                                    onClick={sendMessageButton}
+                                >
+                                    <img src='https://cdn-icons-png.flaticon.com/512/8885/8885650.png' width='28px' />
+                                </Button>
                         </FormControl>
                     </Box>
                 </>
