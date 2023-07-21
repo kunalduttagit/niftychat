@@ -1,4 +1,4 @@
 .env
 .DS_Store
-.DS_Store
+backend/.DS_Store
 node_modules/.DS_Store
