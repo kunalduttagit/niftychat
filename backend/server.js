@@ -8,6 +8,8 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const { instrument } = require('@socket.io/admin-ui');
+const path = require('path');
+
 
 dotenv.config();
 
@@ -16,13 +18,25 @@ const app = express(); //instance of express variable
 
 app.use(express.json()); //to accept json data from frontend refer controllers/userControllers -> const { name, email, password, pic } = req.body;
 
-app.get('/', (req, res) => {
-    res.send('API is running');
-});
-
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/message', messageRoutes);
+
+//===========================DEPLOYMENT=================================
+
+const __direname1 = path.resolve();
+if(process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__direname1, '/frontend/build')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__direname1, "frontend", "build", "index.html"));
+    }); 
+} else {
+    app.get('/', (req, res) => {
+        res.send('API is running');
+    });
+}
+
+//===========================DEPLOYMENT=================================
 
 //error handling middlewares, app.use for global middlewares
 app.use(notFound);
