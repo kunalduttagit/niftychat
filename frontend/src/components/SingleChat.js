@@ -22,7 +22,8 @@ import ScrollableChat from './ScrollableChat';
 import './styles.css';
 import io from 'socket.io-client';
 
-const ENDPOINT = 'http://localhost:5050'; //server or backend
+//const ENDPOINT = 'http://localhost:5050'; //server or backend
+const ENDPOINT = 'https://niftychat.onrender.com';
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
